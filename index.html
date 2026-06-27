@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopSphere | All-in-One Store 🛒</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+        }
+
+        nav {
+            background: #333;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .products-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 265px;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .price {
+            color: #0d6efd;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .btn-buy {
+            background: #28a745;
+            margin-top: 10px;
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 50px auto;
+            flex-wrap: wrap;
+        }
+
+        .inline-login-section {
+            background: #fff;
+            width: 380px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">ShopSphere</div>
+        <ul>
+            <li>Cart: <span id="cart-count">0</span></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to ShopSphere 🛒</h1>
+        <div id="user-display" style="display:none; color:green; font-weight:bold;"></div>
+
+        <h2>Our Database Products</h2>
+        <div id="products-list" class="products-grid">
+        </div>
+
+        <div id="auth-area" class="auth-container">
+            <div class="inline-login-section">
+                <h2>Create Account</h2>
+                <input type="email" id="reg-email" placeholder="Email"><br><br>
+                <input type="password" id="reg-password" placeholder="Password"><br><br>
+                <button class="btn" onclick="triggerRegister()">Sign Up</button>
+            </div>
+
+            <div class="inline-login-section">
+                <h2>Account Login</h2>
+                <input type="email" id="email" placeholder="Email"><br><br>
+                <input type="password" id="password" placeholder="Password"><br><br>
+                <button class="btn" onclick="triggerLogin()">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Fetch products from the Node.js API
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products'); // Yeh tumhare backend se data layega
+                const products = await response.json();
+                const productsList = document.getElementById('products-list');
+                productsList.innerHTML = "";
+
+                products.forEach(product => {
+                    productsList.innerHTML += `
+                        <div class="product-card">
+                            <img src="/images/${product.image}" alt="${product.name}">
+                            <h3>${product.name}</h3>
+                            <div class="price">${product.price}</div>
+                            <button class="btn" onclick="alert('Added to cart')">Add to Cart</button>
+                            <button class="btn btn-buy" onclick="alert('Purchased!')">Buy Now</button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error loading products:", error);
+            }
+        }
+
+        // Login Logic
+        async function triggerLogin() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                document.getElementById("user-display").innerText = "Logged In: " + email;
+                document.getElementById("user-display").style.display = "block";
+            } else {
+                alert(data.message);
+            }
+        }
+
+        // Register Logic
+        async function triggerRegister() {
+            const email = document.getElementById("reg-email").value;
+            const password = document.getElementById("reg-password").value;
+            const res = await fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            alert(data.message);
+        }
+
+        // Initial Load
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
+</body>
+
+</html>
